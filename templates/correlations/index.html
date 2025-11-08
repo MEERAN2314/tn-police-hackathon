@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Traffic Correlations - TOR Analysis System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="page-title">Traffic Correlations</h1>
+            <p class="page-subtitle">Advanced correlation analysis of TOR network traffic patterns</p>
+        </div>
+        <div class="flex space-x-4">
+            <button id="run-analysis" class="btn btn-primary">
+                <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"/>
+                </svg>
+                Run Analysis
+            </button>
+            <button class="btn btn-secondary">
+                <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+                Export Results
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="stat-card">
+        <div class="stat-value">89</div>
+        <div class="stat-label">Active Correlations</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <div class="stat-value">23</div>
+        <div class="stat-label">High Confidence</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+        <div class="stat-value">35</div>
+        <div class="stat-label">Medium Confidence</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <div class="stat-value">31</div>
+        <div class="stat-label">Low Confidence</div>
+    </div>
+</div>
+
+<!-- Correlations Table -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Recent Correlations</h3>
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Correlation ID</th>
+                        <th>Origin IP</th>
+                        <th>Destination IP</th>
+                        <th>Entry Node</th>
+                        <th>Exit Node</th>
+                        <th>Confidence</th>
+                        <th>Method</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>corr_001</td>
+                        <td>192.168.1.10</td>
+                        <td>203.0.113.5</td>
+                        <td>A1B2C3D4...</td>
+                        <td>B2C3D4E5...</td>
+                        <td><span class="badge badge-success">85%</span></td>
+                        <td>Timing Analysis</td>
+                        <td>2 mins ago</td>
+                    </tr>
+                    <tr>
+                        <td>corr_002</td>
+                        <td>10.0.0.25</td>
+                        <td>198.51.100.10</td>
+                        <td>C3D4E5F6...</td>
+                        <td>D4E5F6G7...</td>
+                        <td><span class="badge badge-warning">72%</span></td>
+                        <td>Pattern Analysis</td>
+                        <td>5 mins ago</td>
+                    </tr>
+                    <tr>
+                        <td>corr_003</td>
+                        <td>172.16.0.100</td>
+                        <td>203.0.113.20</td>
+                        <td>E5F6G7H8...</td>
+                        <td>F6G7H8I9...</td>
+                        <td><span class="badge badge-success">91%</span></td>
+                        <td>AI Enhanced</td>
+                        <td>8 mins ago</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('run-analysis').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/api/v1/correlations/analyze', {
+            method: 'POST'
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            window.torApp.showNotification('Analysis started successfully', 'success');
+        }
+    } catch (error) {
+        window.torApp.showNotification('Failed to start analysis', 'error');
+    }
+});
+</script>
+{% endblock %}

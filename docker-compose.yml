@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb+srv://your-connection-string
+      - REDIS_URL=redis://redis:6379
+      - GEMINI_API_KEY=your-gemini-api-key
+    depends_on:
+      - redis
+    volumes:
+      - ./app:/app
+      - ./static:/app/static
+      - ./templates:/app/templates
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+  celery:
+    build: .
+    command: celery -A app.celery_app worker --loglevel=info
+    environment:
+      - MONGODB_URL=mongodb+srv://your-connection-string
+      - REDIS_URL=redis://redis:6379
+      - GEMINI_API_KEY=your-gemini-api-key
+    depends_on:
+      - redis
+    volumes:
+      - ./app:/app
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/var/www/static
+    depends_on:
+      - web
+
+volumes:
+  redis_data:

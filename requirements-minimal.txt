@@ -1,0 +1,15 @@
+# Essential packages only
+fastapi
+uvicorn
+jinja2
+python-multipart
+pydantic
+pydantic-settings
+pymongo
+motor
+redis
+requests
+aiohttp
+python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]

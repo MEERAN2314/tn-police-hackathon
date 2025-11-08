@@ -1,0 +1,509 @@
+{% extends "base.html" %}
+
+{% block title %}Network Topology - TOR Analysis System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="page-title">TOR Network Topology</h1>
+            <p class="page-subtitle">Interactive visualization of TOR network structure and node relationships</p>
+        </div>
+        <div class="flex space-x-4">
+            <div class="flex items-center space-x-2">
+                <label for="layout-select" class="text-sm font-medium text-gray-700">Layout:</label>
+                <select id="layout-select" class="form-select w-32">
+                    <option value="force">Force-directed</option>
+                    <option value="circular">Circular</option>
+                    <option value="hierarchical">Hierarchical</option>
+                </select>
+            </div>
+            <button id="center-view" class="btn btn-secondary">
+                <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M10,22C9.75,22 9.54,21.82 9.5,21.58L9.13,18.93C8.5,18.68 7.96,18.34 7.44,17.94L4.95,18.95C4.73,19.03 4.46,18.95 4.34,18.73L2.34,15.27C2.22,15.05 2.27,14.78 2.46,14.63L4.57,12.97C4.53,12.65 4.5,12.33 4.5,12C4.5,11.67 4.53,11.34 4.57,11L2.46,9.37C2.27,9.22 2.22,8.95 2.34,8.73L4.34,5.27C4.46,5.05 4.73,4.96 4.95,5.05L7.44,6.05C7.96,5.66 8.5,5.32 9.13,5.07L9.5,2.42C9.54,2.18 9.75,2 10,2H14C14.25,2 14.46,2.18 14.5,2.42L14.87,5.07C15.5,5.32 16.04,5.66 16.56,6.05L19.05,5.05C19.27,4.96 19.54,5.05 19.66,5.27L21.66,8.73C21.78,8.95 21.73,9.22 21.54,9.37L19.43,11C19.47,11.34 19.5,11.67 19.5,12C19.5,12.33 19.47,12.65 19.43,12.97L21.54,14.63C21.73,14.78 21.78,15.05 21.66,15.27L19.66,18.73C19.54,18.95 19.27,19.03 19.05,18.95L16.56,17.94C16.04,18.34 15.5,18.68 14.87,18.93L14.5,21.58C14.46,21.82 14.25,22 14,22H10M11.25,4L10.88,6.61C9.68,6.86 8.62,7.5 7.85,8.39L5.44,7.35L4.69,8.65L6.8,10.2C6.4,11.37 6.4,12.64 6.8,13.8L4.68,15.36L5.43,16.66L7.86,15.62C8.63,16.5 9.68,17.14 10.87,17.38L11.24,20H12.76L13.13,17.39C14.32,17.14 15.37,16.5 16.14,15.62L18.57,16.66L19.32,15.36L17.2,13.81C17.6,12.64 17.6,11.37 17.2,10.2L19.31,8.65L18.56,7.35L16.15,8.39C15.38,7.5 14.32,6.86 13.12,6.62L12.75,4H11.25Z"/>
+                </svg>
+                Center View
+            </button>
+            <button id="refresh-topology" class="btn btn-primary">
+                <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Network Visualization -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Main Network Graph -->
+    <div class="lg:col-span-3">
+        <div class="card">
+            <div class="card-header">
+                <div class="flex justify-between items-center">
+                    <h3 class="card-title">Network Graph</h3>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Guard Nodes</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-cyan-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Middle Nodes</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Exit Nodes</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Bridge Nodes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="network-graph" class="w-full h-96 bg-gray-50 relative overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="spinner mb-4"></div>
+                            <p class="text-gray-600">Loading network topology...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls and Info Panel -->
+    <div class="space-y-6">
+        <!-- Search and Filters -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Search & Filter</h3>
+            </div>
+            <div class="card-body space-y-4">
+                <div>
+                    <label class="form-label">Search Nodes</label>
+                    <input 
+                        type="text" 
+                        id="node-search" 
+                        class="form-input" 
+                        placeholder="Nickname, IP, or fingerprint"
+                    >
+                </div>
+                
+                <div>
+                    <label class="form-label">Node Type</label>
+                    <select id="node-type-filter" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="guard">Guard Nodes</option>
+                        <option value="middle">Middle Nodes</option>
+                        <option value="exit">Exit Nodes</option>
+                        <option value="bridge">Bridge Nodes</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label">Country</label>
+                    <select id="country-filter" class="form-select">
+                        <option value="">All Countries</option>
+                        <!-- Countries will be populated dynamically -->
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label">Bandwidth Range</label>
+                    <div class="flex space-x-2">
+                        <input type="number" id="bandwidth-min" class="form-input" placeholder="Min KB/s">
+                        <input type="number" id="bandwidth-max" class="form-input" placeholder="Max KB/s">
+                    </div>
+                </div>
+                
+                <button id="apply-filters" class="btn btn-primary w-full">Apply Filters</button>
+                <button id="clear-filters" class="btn btn-secondary w-full">Clear All</button>
+            </div>
+        </div>
+
+        <!-- Selected Node Info -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Node Information</h3>
+            </div>
+            <div class="card-body">
+                <div id="node-info" class="text-center text-gray-500">
+                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7.07,18.28C7.5,17.38 10.12,16.5 12,16.5C13.88,16.5 16.5,17.38 16.93,18.28C15.57,19.36 13.86,20 12,20C10.14,20 8.43,19.36 7.07,18.28M18.36,16.83C16.93,15.09 13.46,14.5 12,14.5C10.54,14.5 7.07,15.09 5.64,16.83C4.62,15.5 4,13.82 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,13.82 19.38,15.5 18.36,16.83M12,6C10.06,6 8.5,7.56 8.5,9.5C8.5,11.44 10.06,13 12,13C13.94,13 15.5,11.44 15.5,9.5C15.5,7.56 13.94,6 12,6M12,11A1.5,1.5 0 0,1 10.5,9.5A1.5,1.5 0 0,1 12,8A1.5,1.5 0 0,1 13.5,9.5A1.5,1.5 0 0,1 12,11Z"/>
+                    </svg>
+                    <p>Click on a node to view details</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Statistics -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Network Stats</h3>
+            </div>
+            <div class="card-body">
+                <div id="network-stats" class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Nodes:</span>
+                        <span id="total-nodes-count" class="font-semibold">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Visible Nodes:</span>
+                        <span id="visible-nodes-count" class="font-semibold">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Connections:</span>
+                        <span id="connections-count" class="font-semibold">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Countries:</span>
+                        <span id="countries-count" class="font-semibold">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Node Details Modal -->
+<div id="node-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-semibold" id="modal-node-title">Node Details</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="modal-node-content">
+                <!-- Node details will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class NetworkTopology {
+    constructor() {
+        this.svg = null;
+        this.simulation = null;
+        this.nodes = [];
+        this.links = [];
+        this.selectedNode = null;
+        this.init();
+    }
+
+    init() {
+        this.setupSVG();
+        this.bindEvents();
+        this.loadNetworkData();
+    }
+
+    setupSVG() {
+        const container = document.getElementById('network-graph');
+        const rect = container.getBoundingClientRect();
+        
+        this.svg = d3.select('#network-graph')
+            .append('svg')
+            .attr('width', '100%')
+            .attr('height', '100%')
+            .attr('viewBox', `0 0 ${rect.width} ${rect.height}`)
+            .style('position', 'absolute')
+            .style('top', 0)
+            .style('left', 0);
+
+        // Add zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 10])
+            .on('zoom', (event) => {
+                this.svg.select('.network-container')
+                    .attr('transform', event.transform);
+            });
+
+        this.svg.call(zoom);
+
+        // Create container for network elements
+        this.networkContainer = this.svg.append('g')
+            .attr('class', 'network-container');
+
+        // Create groups for links and nodes
+        this.linksGroup = this.networkContainer.append('g').attr('class', 'links');
+        this.nodesGroup = this.networkContainer.append('g').attr('class', 'nodes');
+    }
+
+    bindEvents() {
+        document.getElementById('refresh-topology').addEventListener('click', () => {
+            this.loadNetworkData();
+        });
+
+        document.getElementById('center-view').addEventListener('click', () => {
+            this.centerView();
+        });
+
+        document.getElementById('layout-select').addEventListener('change', (e) => {
+            this.changeLayout(e.target.value);
+        });
+
+        document.getElementById('apply-filters').addEventListener('click', () => {
+            this.applyFilters();
+        });
+
+        document.getElementById('clear-filters').addEventListener('click', () => {
+            this.clearFilters();
+        });
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('node-modal').classList.add('hidden');
+        });
+    }
+
+    async loadNetworkData() {
+        try {
+            const response = await fetch('/api/v1/nodes?limit=200');
+            const nodes = await response.json();
+            
+            this.processNetworkData(nodes);
+            this.updateVisualization();
+            this.updateStats();
+        } catch (error) {
+            console.error('Error loading network data:', error);
+        }
+    }
+
+    processNetworkData(nodes) {
+        this.nodes = nodes.map(node => ({
+            id: node.fingerprint,
+            nickname: node.nickname,
+            type: node.type,
+            country: node.country,
+            country_name: node.country_name,
+            bandwidth: node.bandwidth,
+            address: node.address,
+            or_port: node.or_port,
+            flags: node.flags,
+            x: Math.random() * 800,
+            y: Math.random() * 600
+        }));
+
+        // Generate some sample links (in real implementation, this would come from circuit data)
+        this.links = this.generateSampleLinks();
+    }
+
+    generateSampleLinks() {
+        const links = [];
+        const guardNodes = this.nodes.filter(n => n.type === 'guard');
+        const middleNodes = this.nodes.filter(n => n.type === 'middle');
+        const exitNodes = this.nodes.filter(n => n.type === 'exit');
+
+        // Create some sample circuits
+        for (let i = 0; i < Math.min(50, guardNodes.length); i++) {
+            const guard = guardNodes[i];
+            const middle = middleNodes[Math.floor(Math.random() * middleNodes.length)];
+            const exit = exitNodes[Math.floor(Math.random() * exitNodes.length)];
+
+            if (middle && exit) {
+                links.push(
+                    { source: guard.id, target: middle.id, type: 'circuit' },
+                    { source: middle.id, target: exit.id, type: 'circuit' }
+                );
+            }
+        }
+
+        return links;
+    }
+
+    updateVisualization() {
+        // Update simulation
+        this.simulation = d3.forceSimulation(this.nodes)
+            .force('link', d3.forceLink(this.links).id(d => d.id).distance(100))
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('center', d3.forceCenter(400, 300))
+            .force('collision', d3.forceCollide().radius(20));
+
+        // Update links
+        const link = this.linksGroup.selectAll('.link')
+            .data(this.links);
+
+        link.enter()
+            .append('line')
+            .attr('class', 'link')
+            .style('stroke', '#999')
+            .style('stroke-opacity', 0.6)
+            .style('stroke-width', 1);
+
+        link.exit().remove();
+
+        // Update nodes
+        const node = this.nodesGroup.selectAll('.node')
+            .data(this.nodes);
+
+        const nodeEnter = node.enter()
+            .append('g')
+            .attr('class', 'node')
+            .call(d3.drag()
+                .on('start', this.dragStarted.bind(this))
+                .on('drag', this.dragged.bind(this))
+                .on('end', this.dragEnded.bind(this)));
+
+        nodeEnter.append('circle')
+            .attr('r', d => Math.max(5, Math.log(d.bandwidth + 1) * 2))
+            .style('fill', d => this.getNodeColor(d.type))
+            .style('stroke', '#fff')
+            .style('stroke-width', 2);
+
+        nodeEnter.append('text')
+            .attr('dx', 12)
+            .attr('dy', 4)
+            .style('font-size', '10px')
+            .style('fill', '#333')
+            .text(d => d.nickname);
+
+        nodeEnter.on('click', (event, d) => {
+            this.showNodeDetails(d);
+        });
+
+        node.exit().remove();
+
+        // Update simulation tick
+        this.simulation.on('tick', () => {
+            this.linksGroup.selectAll('.link')
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            this.nodesGroup.selectAll('.node')
+                .attr('transform', d => `translate(${d.x},${d.y})`);
+        });
+    }
+
+    getNodeColor(type) {
+        const colors = {
+            'guard': '#3b82f6',
+            'middle': '#06b6d4',
+            'exit': '#10b981',
+            'bridge': '#f59e0b'
+        };
+        return colors[type] || '#6b7280';
+    }
+
+    showNodeDetails(node) {
+        this.selectedNode = node;
+        
+        const modal = document.getElementById('node-modal');
+        const title = document.getElementById('modal-node-title');
+        const content = document.getElementById('modal-node-content');
+
+        title.textContent = `${node.nickname} (${node.type})`;
+        
+        content.innerHTML = `
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-semibold mb-2">Basic Information</h4>
+                    <div class="space-y-2 text-sm">
+                        <div><strong>Fingerprint:</strong> ${node.id}</div>
+                        <div><strong>Address:</strong> ${node.address}:${node.or_port}</div>
+                        <div><strong>Type:</strong> <span class="badge badge-${this.getNodeTypeBadge(node.type)}">${node.type}</span></div>
+                        <div><strong>Country:</strong> ${node.country_name} (${node.country})</div>
+                        <div><strong>Bandwidth:</strong> ${this.formatBandwidth(node.bandwidth)}</div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-2">Flags</h4>
+                    <div class="flex flex-wrap gap-1">
+                        ${node.flags.map(flag => `<span class="badge badge-secondary">${flag}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modal.classList.remove('hidden');
+    }
+
+    getNodeTypeBadge(type) {
+        const badges = {
+            'guard': 'primary',
+            'middle': 'secondary',
+            'exit': 'success',
+            'bridge': 'warning'
+        };
+        return badges[type] || 'secondary';
+    }
+
+    formatBandwidth(bandwidth) {
+        if (bandwidth >= 1024 * 1024) {
+            return `${(bandwidth / (1024 * 1024)).toFixed(1)} MB/s`;
+        } else if (bandwidth >= 1024) {
+            return `${(bandwidth / 1024).toFixed(1)} KB/s`;
+        }
+        return `${bandwidth} B/s`;
+    }
+
+    updateStats() {
+        document.getElementById('total-nodes-count').textContent = this.nodes.length;
+        document.getElementById('visible-nodes-count').textContent = this.nodes.length;
+        document.getElementById('connections-count').textContent = this.links.length;
+        
+        const countries = new Set(this.nodes.map(n => n.country));
+        document.getElementById('countries-count').textContent = countries.size;
+    }
+
+    centerView() {
+        const svg = d3.select('#network-graph svg');
+        svg.transition().duration(750).call(
+            d3.zoom().transform,
+            d3.zoomIdentity
+        );
+    }
+
+    changeLayout(layout) {
+        // Implement different layout algorithms
+        console.log('Changing layout to:', layout);
+    }
+
+    applyFilters() {
+        // Implement filtering logic
+        console.log('Applying filters');
+    }
+
+    clearFilters() {
+        // Clear all filters
+        document.getElementById('node-search').value = '';
+        document.getElementById('node-type-filter').value = '';
+        document.getElementById('country-filter').value = '';
+        document.getElementById('bandwidth-min').value = '';
+        document.getElementById('bandwidth-max').value = '';
+    }
+
+    dragStarted(event, d) {
+        if (!event.active) this.simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    dragEnded(event, d) {
+        if (!event.active) this.simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+}
+
+// Initialize network topology when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    window.networkTopology = new NetworkTopology();
+});
+</script>
+{% endblock %}

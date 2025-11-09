@@ -38,101 +38,139 @@
         </div>
     </div>
 
-    <!-- Simple Top Navigation Bar -->
-    <div class="top-navbar">
-        <div class="navbar-container">
-            <!-- Logo -->
-            <div class="navbar-logo">
-                <a href="/" class="logo-link">
-                    <div class="logo-icon">🔒</div>
-                    <span class="logo-text">TOR Analysis System</span>
-                </a>
-            </div>
 
-            <!-- Navigation Links -->
-            <nav class="navbar-nav">
-                <a href="/dashboard" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
-                <a href="/network" class="nav-link {% if page == 'network' %}active{% endif %}">Network</a>
-                <a href="/correlations" class="nav-link {% if page == 'correlations' %}active{% endif %}">Correlations</a>
-                <a href="/analysis" class="nav-link {% if page == 'analysis' %}active{% endif %}">Analysis</a>
-                <a href="/reports" class="nav-link {% if page == 'reports' %}active{% endif %}">Reports</a>
-            </nav>
 
-            <!-- User Section -->
-            <div class="navbar-user">
-                <div class="connection-status">
-                    <span class="status-dot"></span>
-                    <span class="status-text">Connected</span>
+
+
+    <!-- Enhanced Sidebar -->
+    <aside class="sidebar" style="width: 280px; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.1); height: 100vh; position: fixed; left: 0; top: 0; overflow-y: auto; z-index: 100;">
+        
+        <!-- Logo Section -->
+        <div style="padding: 24px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <svg style="width: 24px; height: 24px; color: white;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1M12 7C13.4 7 14.8 8.6 14.8 10V11H16V16H8V11H9.2V10C9.2 8.6 10.6 7 12 7M12 8.2C11.2 8.2 10.4 8.7 10.4 10V11H13.6V10C13.6 8.7 12.8 8.2 12 8.2Z"/>
+                    </svg>
                 </div>
-                
-                {% if user %}
-                <div class="user-info">
-                    <div class="user-avatar">{{ user.username[0].upper() }}</div>
-                    <span class="user-name">{{ user.username }}</span>
-                    <div class="user-dropdown">
-                        <button class="dropdown-btn" onclick="toggleDropdown()">▼</button>
-                        <div class="dropdown-content" id="userDropdown">
-                            <a href="/profile">Profile</a>
-                            <a href="/settings">Settings</a>
-                            <hr>
-                            <a href="/auth/logout" class="logout-link">Logout</a>
-                        </div>
-                    </div>
+                <div>
+                    <h1 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0; line-height: 1.2;">TOR Analysis</h1>
+                    <p style="font-size: 12px; color: #6b7280; margin: 0;">Security System</p>
                 </div>
-                {% else %}
-                <a href="/auth/login" class="login-button">Login</a>
-                {% endif %}
             </div>
         </div>
-    </div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <nav class="sidebar-nav">
-            <a href="/dashboard" class="sidebar-link {% if page == 'dashboard' %}active{% endif %}">
-                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="currentColor">
+        {% if user %}
+        <!-- User Profile Section -->
+        <div style="padding: 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #06b6d4, #3b82f6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">
+                    {{ user.username[0].upper() }}
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0; line-height: 1.2;">{{ user.username }}</h3>
+                    <p style="font-size: 14px; color: #6b7280; margin: 0;">Administrator</p>
+                </div>
+            </div>
+            
+            <!-- Connection Status -->
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
+                <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+                <span style="font-size: 14px; color: #059669; font-weight: 500;">System Connected</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation Section -->
+        <nav style="padding: 16px 0;">
+            <div style="padding: 0 20px; margin-bottom: 8px;">
+                <h4 style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Navigation</h4>
+            </div>
+            
+            <a href="/dashboard" style="display: flex; align-items: center; padding: 12px 20px; color: {% if page == 'dashboard' %}#4f46e5{% else %}#6b7280{% endif %}; text-decoration: none; font-weight: 500; transition: all 0.2s ease; background: {% if page == 'dashboard' %}#eef2ff{% else %}transparent{% endif %}; border-right: {% if page == 'dashboard' %}3px solid #4f46e5{% else %}3px solid transparent{% endif %};"
+               onmouseover="if('{{ page }}' !== 'dashboard') { this.style.background='#f9fafb'; this.style.color='#374151'; }"
+               onmouseout="if('{{ page }}' !== 'dashboard') { this.style.background='transparent'; this.style.color='#6b7280'; }">
+                <svg style="width: 20px; height: 20px; margin-right: 12px;" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
                 </svg>
                 Dashboard
             </a>
             
-            <a href="/network" class="sidebar-link {% if page == 'network' %}active{% endif %}">
-                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="currentColor">
+            <a href="/network" style="display: flex; align-items: center; padding: 12px 20px; color: {% if page == 'network' %}#4f46e5{% else %}#6b7280{% endif %}; text-decoration: none; font-weight: 500; transition: all 0.2s ease; background: {% if page == 'network' %}#eef2ff{% else %}transparent{% endif %}; border-right: {% if page == 'network' %}3px solid #4f46e5{% else %}3px solid transparent{% endif %};"
+               onmouseover="if('{{ page }}' !== 'network') { this.style.background='#f9fafb'; this.style.color='#374151'; }"
+               onmouseout="if('{{ page }}' !== 'network') { this.style.background='transparent'; this.style.color='#6b7280'; }">
+                <svg style="width: 20px; height: 20px; margin-right: 12px;" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
                 </svg>
                 Network Topology
             </a>
             
-            <a href="/correlations" class="sidebar-link {% if page == 'correlations' %}active{% endif %}">
-                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="currentColor">
+            <a href="/correlations" style="display: flex; align-items: center; padding: 12px 20px; color: {% if page == 'correlations' %}#4f46e5{% else %}#6b7280{% endif %}; text-decoration: none; font-weight: 500; transition: all 0.2s ease; background: {% if page == 'correlations' %}#eef2ff{% else %}transparent{% endif %}; border-right: {% if page == 'correlations' %}3px solid #4f46e5{% else %}3px solid transparent{% endif %};"
+               onmouseover="if('{{ page }}' !== 'correlations') { this.style.background='#f9fafb'; this.style.color='#374151'; }"
+               onmouseout="if('{{ page }}' !== 'correlations') { this.style.background='transparent'; this.style.color='#6b7280'; }">
+                <svg style="width: 20px; height: 20px; margin-right: 12px;" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4 0h-2v6h2v-6zm2.5-5H19V4h-3V2H8v2H5v2h-.5C3.67 6 3 6.67 3 7.5S3.67 9 4.5 9H5v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V9h.5c.83 0 1.5-.67 1.5-1.5S20.33 6 19.5 6z"/>
                 </svg>
                 Traffic Correlations
             </a>
             
-            <a href="/analysis" class="sidebar-link {% if page == 'analysis' %}active{% endif %}">
-                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="currentColor">
+            <a href="/analysis" style="display: flex; align-items: center; padding: 12px 20px; color: {% if page == 'analysis' %}#4f46e5{% else %}#6b7280{% endif %}; text-decoration: none; font-weight: 500; transition: all 0.2s ease; background: {% if page == 'analysis' %}#eef2ff{% else %}transparent{% endif %}; border-right: {% if page == 'analysis' %}3px solid #4f46e5{% else %}3px solid transparent{% endif %};"
+               onmouseover="if('{{ page }}' !== 'analysis') { this.style.background='#f9fafb'; this.style.color='#374151'; }"
+               onmouseout="if('{{ page }}' !== 'analysis') { this.style.background='transparent'; this.style.color='#6b7280'; }">
+                <svg style="width: 20px; height: 20px; margin-right: 12px;" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
                 </svg>
                 Analysis Tools
             </a>
             
-            <a href="/reports" class="sidebar-link {% if page == 'reports' %}active{% endif %}">
-                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="currentColor">
+            <a href="/reports" style="display: flex; align-items: center; padding: 12px 20px; color: {% if page == 'reports' %}#4f46e5{% else %}#6b7280{% endif %}; text-decoration: none; font-weight: 500; transition: all 0.2s ease; background: {% if page == 'reports' %}#eef2ff{% else %}transparent{% endif %}; border-right: {% if page == 'reports' %}3px solid #4f46e5{% else %}3px solid transparent{% endif %};"
+               onmouseover="if('{{ page }}' !== 'reports') { this.style.background='#f9fafb'; this.style.color='#374151'; }"
+               onmouseout="if('{{ page }}' !== 'reports') { this.style.background='transparent'; this.style.color='#6b7280'; }">
+                <svg style="width: 20px; height: 20px; margin-right: 12px;" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                 </svg>
                 Reports
             </a>
+        </nav>
+
+        {% if user %}
+        <!-- User Actions Section -->
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; border-top: 1px solid #e5e7eb; background: white;">
+            <div style="padding: 0 0 12px 0;">
+                <h4 style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Account</h4>
+            </div>
             
-            <div class="sidebar-divider"></div>
-            
-            <a href="/settings" class="sidebar-link {% if page == 'settings' %}active{% endif %}">
-                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="currentColor">
+            <a href="/settings" style="display: flex; align-items: center; padding: 8px 0; color: #6b7280; text-decoration: none; font-weight: 500; transition: all 0.2s ease; margin-bottom: 8px;"
+               onmouseover="this.style.color='#374151';"
+               onmouseout="this.style.color='#6b7280';">
+                <svg style="width: 18px; height: 18px; margin-right: 12px;" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
                 </svg>
                 Settings
             </a>
-        </nav>
+            
+            <a href="/auth/logout" style="display: flex; align-items: center; padding: 8px 0; color: #dc2626; text-decoration: none; font-weight: 500; transition: all 0.2s ease;"
+               onmouseover="this.style.color='#b91c1c'; this.style.background='#fef2f2'; this.style.borderRadius='6px'; this.style.padding='8px 12px'; this.style.margin='0 -12px';"
+               onmouseout="this.style.color='#dc2626'; this.style.background='transparent'; this.style.padding='8px 0'; this.style.margin='0';">
+                <svg style="width: 18px; height: 18px; margin-right: 12px;" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                </svg>
+                Logout
+            </a>
+        </div>
+        {% else %}
+        <!-- Login Section for Non-authenticated Users -->
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; border-top: 1px solid #e5e7eb; background: white;">
+            <a href="/auth/login" style="display: flex; align-items: center; justify-content: center; padding: 12px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; text-decoration: none; font-weight: 600; border-radius: 8px; transition: all 0.2s ease;"
+               onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(79, 70, 229, 0.3)';"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <svg style="width: 18px; height: 18px; margin-right: 8px;" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10,17V14H3V10H10V7L15,12L10,17M10,2H19A2,2 0 0,1 21,4V20A2,2 0 0,1 19,22H10A2,2 0 0,1 8,20V18H10V20H19V4H10V6H8V4A2,2 0 0,1 10,2Z"/>
+                </svg>
+                Login to System
+            </a>
+        </div>
+        {% endif %}
     </aside>
 
     <!-- Main Content -->
@@ -147,33 +185,27 @@
     <script src="/static/js/main.js"></script>
     
     <script>
-        // Simple Navbar JavaScript
-        function toggleDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('userDropdown');
-            const dropdownBtn = document.querySelector('.dropdown-btn');
-            
-            if (dropdown && !dropdown.contains(event.target) && !dropdownBtn.contains(event.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
-
-        // Add smooth hover effects
+        // Simple sidebar functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
+            // Add smooth hover effects for sidebar links
+            const sidebarLinks = document.querySelectorAll('a[style*="display: flex"]');
+            sidebarLinks.forEach(link => {
+                // Skip if it's the logout link (has red color)
+                if (link.style.color && link.style.color.includes('dc2626')) {
+                    return;
+                }
+                
                 link.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
+                    if (!this.style.background.includes('eef2ff')) {
+                        this.style.background = '#f9fafb';
+                        this.style.color = '#374151';
+                    }
                 });
                 
                 link.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('active')) {
-                        this.style.transform = 'translateY(0)';
+                    if (!this.style.background.includes('eef2ff')) {
+                        this.style.background = 'transparent';
+                        this.style.color = '#6b7280';
                     }
                 });
             });

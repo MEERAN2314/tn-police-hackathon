@@ -38,51 +38,53 @@
         </div>
     </div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="/" class="logo">
-                    <div class="logo-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
-                    </div>
-                    TOR Analysis System
+    <!-- Simple Top Navigation Bar -->
+    <div class="top-navbar">
+        <div class="navbar-container">
+            <!-- Logo -->
+            <div class="navbar-logo">
+                <a href="/" class="logo-link">
+                    <div class="logo-icon">🔒</div>
+                    <span class="logo-text">TOR Analysis System</span>
                 </a>
+            </div>
 
-                <nav class="nav">
-                    <a href="/dashboard" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
-                    <a href="/network" class="nav-link {% if page == 'network' %}active{% endif %}">Network</a>
-                    <a href="/correlations" class="nav-link {% if page == 'correlations' %}active{% endif %}">Correlations</a>
-                    <a href="/analysis" class="nav-link {% if page == 'analysis' %}active{% endif %}">Analysis</a>
-                    <a href="/reports" class="nav-link {% if page == 'reports' %}active{% endif %}">Reports</a>
-                </nav>
+            <!-- Navigation Links -->
+            <nav class="navbar-nav">
+                <a href="/dashboard" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="/network" class="nav-link {% if page == 'network' %}active{% endif %}">Network</a>
+                <a href="/correlations" class="nav-link {% if page == 'correlations' %}active{% endif %}">Correlations</a>
+                <a href="/analysis" class="nav-link {% if page == 'analysis' %}active{% endif %}">Analysis</a>
+                <a href="/reports" class="nav-link {% if page == 'reports' %}active{% endif %}">Reports</a>
+            </nav>
 
-                <div class="flex items-center space-x-4">
-                    <div id="connection-status" class="status-indicator">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Connecting...</span>
-                    </div>
-                    
-                    {% if user %}
-                    <div class="user-menu">
-                        <span class="text-white">{{ user.full_name }}</span>
-                        <a href="/auth/logout" class="btn btn-secondary btn-sm ml-2">Logout</a>
-                    </div>
-                    {% else %}
-                    <a href="/auth/login" class="btn btn-secondary btn-sm">Login</a>
-                    {% endif %}
-
-                    <button id="mobile-menu-btn" class="btn btn-secondary btn-sm md:hidden">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                        </svg>
-                    </button>
+            <!-- User Section -->
+            <div class="navbar-user">
+                <div class="connection-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connected</span>
                 </div>
+                
+                {% if user %}
+                <div class="user-info">
+                    <div class="user-avatar">{{ user.username[0].upper() }}</div>
+                    <span class="user-name">{{ user.username }}</span>
+                    <div class="user-dropdown">
+                        <button class="dropdown-btn" onclick="toggleDropdown()">▼</button>
+                        <div class="dropdown-content" id="userDropdown">
+                            <a href="/profile">Profile</a>
+                            <a href="/settings">Settings</a>
+                            <hr>
+                            <a href="/auth/logout" class="logout-link">Logout</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <a href="/auth/login" class="login-button">Login</a>
+                {% endif %}
             </div>
         </div>
-    </header>
+    </div>
 
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -143,6 +145,41 @@
 
     <!-- JavaScript -->
     <script src="/static/js/main.js"></script>
+    
+    <script>
+        // Simple Navbar JavaScript
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownBtn = document.querySelector('.dropdown-btn');
+            
+            if (dropdown && !dropdown.contains(event.target) && !dropdownBtn.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Add smooth hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+        });
+    </script>
+    
     {% block extra_js %}{% endblock %}
 
     <style>
@@ -224,6 +261,22 @@
             color: var(--gray-700);
         }
 
+        /* User Menu Styles */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info span {
+            display: block;
+            line-height: 1.2;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .nav {
@@ -231,7 +284,12 @@
             }
             
             .user-menu {
-                display: none;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .user-info {
+                text-align: center;
             }
         }
     </style>

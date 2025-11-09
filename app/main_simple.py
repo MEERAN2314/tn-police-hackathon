@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Form, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 import logging
 from datetime import datetime
 import os
@@ -21,6 +22,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Add session middleware
+app.add_middleware(SessionMiddleware, secret_key="your-secret-key-change-in-production")
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -33,6 +37,24 @@ app.add_middleware(
 # Static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+# Authentication helpers
+def get_current_user(request: Request):
+    """Get current user from session"""
+    return request.session.get("user")
+
+def require_auth(request: Request):
+    """Require authentication, redirect to login if not authenticated"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return user
+
+# Demo credentials
+DEMO_USERS = {
+    "admin": "admin123",
+    "user": "password123"
+}
 
 # Mock data for demo
 MOCK_STATS = {
@@ -87,74 +109,104 @@ MOCK_CORRELATIONS = [
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Main dashboard page"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    
     return templates.TemplateResponse(
         "dashboard/index.html",
         {
             "request": request,
             "title": "TOR Analysis Dashboard",
             "page": "dashboard",
-            "stats": MOCK_STATS
+            "stats": MOCK_STATS,
+            "user": user
         }
     )
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
     """Dashboard page"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    
     return templates.TemplateResponse(
         "dashboard/index.html",
         {
             "request": request,
             "title": "TOR Analysis Dashboard",
             "page": "dashboard",
-            "stats": MOCK_STATS
+            "stats": MOCK_STATS,
+            "user": user
         }
     )
 
 @app.get("/network", response_class=HTMLResponse)
 async def network_topology(request: Request):
     """Network topology page"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    
     return templates.TemplateResponse(
         "network/topology.html",
         {
             "request": request,
             "title": "Network Topology",
-            "page": "network"
+            "page": "network",
+            "user": user
         }
     )
 
 @app.get("/correlations", response_class=HTMLResponse)
 async def correlations_page(request: Request):
     """Correlations page"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    
     return templates.TemplateResponse(
         "correlations/index.html",
         {
             "request": request,
             "title": "Traffic Correlations",
-            "page": "correlations"
+            "page": "correlations",
+            "user": user
         }
     )
 
 @app.get("/analysis", response_class=HTMLResponse)
 async def analysis_page(request: Request):
     """Analysis page"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    
     return templates.TemplateResponse(
         "analysis/dashboard.html",
         {
             "request": request,
             "title": "Analysis Tools",
-            "page": "analysis"
+            "page": "analysis",
+            "user": user
         }
     )
 
 @app.get("/reports", response_class=HTMLResponse)
 async def reports_page(request: Request):
     """Reports page"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    
     return templates.TemplateResponse(
         "reports/dashboard.html",
         {
             "request": request,
             "title": "Reports",
-            "page": "reports"
+            "page": "reports",
+            "user": user
         }
     )
 
@@ -233,10 +285,15 @@ async def health_check():
         }
     )
 
-# Authentication routes (simplified)
+# Authentication routes
 @app.get("/auth/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     """Login page"""
+    # If already logged in, redirect to dashboard
+    user = get_current_user(request)
+    if user:
+        return RedirectResponse(url="/dashboard", status_code=302)
+    
     return templates.TemplateResponse(
         "auth/login.html",
         {
@@ -246,11 +303,33 @@ async def login_page(request: Request):
     )
 
 @app.post("/auth/login")
-async def login(request: Request):
-    """Simple login - always redirect to dashboard"""
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/dashboard", status_code=302)
+async def login(request: Request, username: str = Form(...), password: str = Form(...)):
+    """Handle login form submission"""
+    # Check credentials
+    if username in DEMO_USERS and DEMO_USERS[username] == password:
+        # Set session
+        request.session["user"] = {
+            "username": username,
+            "login_time": datetime.utcnow().isoformat()
+        }
+        return RedirectResponse(url="/dashboard", status_code=302)
+    else:
+        # Login failed
+        return templates.TemplateResponse(
+            "auth/login.html",
+            {
+                "request": request,
+                "title": "Login - TOR Analysis System",
+                "error": "Invalid username or password"
+            }
+        )
+
+@app.get("/auth/logout")
+async def logout(request: Request):
+    """Logout user"""
+    request.session.clear()
+    return RedirectResponse(url="/auth/login", status_code=302)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8006)

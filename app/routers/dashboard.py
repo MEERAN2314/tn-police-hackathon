@@ -15,8 +15,12 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    """Main dashboard page"""
+    """Main dashboard page - publicly accessible"""
     try:
+        # Get optional user (don't require authentication)
+        from app.routers.auth import get_optional_user
+        user = await get_optional_user(request)
+        
         # Get dashboard statistics
         stats = await get_dashboard_stats()
         
@@ -26,7 +30,8 @@ async def dashboard(request: Request):
                 "request": request,
                 "title": "TOR Analysis Dashboard",
                 "page": "dashboard",
-                "stats": stats
+                "stats": stats,
+                "user": user  # Will be None if not logged in
             }
         )
     except Exception as e:
@@ -36,60 +41,80 @@ async def dashboard(request: Request):
 @router.get("/network", response_class=HTMLResponse)
 async def network_topology(request: Request):
     """Network topology visualization page"""
+    from app.routers.auth import get_optional_user
+    user = await get_optional_user(request)
+    
     return templates.TemplateResponse(
         "network/topology.html",
         {
             "request": request,
             "title": "Network Topology",
-            "page": "network"
+            "page": "network",
+            "user": user
         }
     )
 
 @router.get("/correlations", response_class=HTMLResponse)
 async def correlations_page(request: Request):
     """Correlations analysis page"""
+    from app.routers.auth import get_optional_user
+    user = await get_optional_user(request)
+    
     return templates.TemplateResponse(
         "correlations/index.html",
         {
             "request": request,
             "title": "Traffic Correlations",
-            "page": "correlations"
+            "page": "correlations",
+            "user": user
         }
     )
 
 @router.get("/analysis", response_class=HTMLResponse)
 async def analysis_page(request: Request):
     """Analysis tools page"""
+    from app.routers.auth import get_optional_user
+    user = await get_optional_user(request)
+    
     return templates.TemplateResponse(
         "analysis/index.html",
         {
             "request": request,
             "title": "Analysis Tools",
-            "page": "analysis"
+            "page": "analysis",
+            "user": user
         }
     )
 
 @router.get("/reports", response_class=HTMLResponse)
 async def reports_page(request: Request):
     """Reports page"""
+    from app.routers.auth import get_optional_user
+    user = await get_optional_user(request)
+    
     return templates.TemplateResponse(
         "reports/index.html",
         {
             "request": request,
             "title": "Reports",
-            "page": "reports"
+            "page": "reports",
+            "user": user
         }
     )
 
 @router.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request):
     """Settings page"""
+    from app.routers.auth import get_optional_user
+    user = await get_optional_user(request)
+    
     return templates.TemplateResponse(
         "settings/index.html",
         {
             "request": request,
             "title": "Settings",
-            "page": "settings"
+            "page": "settings",
+            "user": user
         }
     )
 

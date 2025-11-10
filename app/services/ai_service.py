@@ -32,7 +32,7 @@ class AIService:
                 genai.configure(api_key=settings.gemini_api_key)
                 
                 self.llm = ChatGoogleGenerativeAI(
-                    model="gemini-pro",
+                    model="gemini-1.5-flash",  # Updated model name
                     google_api_key=settings.gemini_api_key,
                     temperature=0.1,
                     max_tokens=1000

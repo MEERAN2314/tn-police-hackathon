@@ -61,6 +61,9 @@ class GeolocationService:
                         'organization': data.get('organization', 'Unknown'),
                         'source': 'ipgeolocation.io'
                     }
+                elif response.status == 423:
+                    logger.warning(f"IPGeolocation.io API rate limit exceeded")
+                    return await self._get_free_geolocation(ip_address)
                 else:
                     logger.warning(f"IPGeolocation.io API error: {response.status}")
                     return await self._get_free_geolocation(ip_address)

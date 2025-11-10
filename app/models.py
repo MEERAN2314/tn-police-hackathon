@@ -47,6 +47,8 @@ class TrafficFlow(BaseModel):
     entry_node: Optional[str] = Field(None, description="Entry node fingerprint")
     exit_node: Optional[str] = Field(None, description="Exit node fingerprint")
     circuit_id: Optional[str] = Field(None, description="Circuit ID")
+    traffic_type: Optional[str] = Field(None, description="Type of traffic")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 class Correlation(BaseModel):
     id: str = Field(..., description="Unique correlation ID")

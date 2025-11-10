@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from typing import List, Optional, Dict, Any
 import logging
 from datetime import datetime, timedelta
@@ -230,37 +230,14 @@ async def get_ai_analysis(
         raise HTTPException(status_code=500, detail="AI analysis failed")
 
 @router.get("/dashboard/stats")
-async def get_dashboard_stats():
+async def get_dashboard_stats(request: Request):
     """Get real-time dashboard statistics"""
     try:
-        db = await get_database()
+        # Get realtime service from app state
+        realtime_service = request.app.state.realtime_service
         
-        # Get various statistics
-        stats = {
-            "nodes": {
-                "total": await db.tor_nodes.count_documents({}),
-                "guard": await db.tor_nodes.count_documents({"type": "guard"}),
-                "middle": await db.tor_nodes.count_documents({"type": "middle"}),
-                "exit": await db.tor_nodes.count_documents({"type": "exit"}),
-                "bridge": await db.tor_nodes.count_documents({"type": "bridge"})
-            },
-            "correlations": {
-                "total": await db.correlations.count_documents({}),
-                "high_confidence": await db.correlations.count_documents({"confidence_score": {"$gte": 0.8}}),
-                "medium_confidence": await db.correlations.count_documents({"confidence_score": {"$gte": 0.5, "$lt": 0.8}}),
-                "recent": await db.correlations.count_documents({
-                    "created_at": {"$gte": datetime.utcnow() - timedelta(hours=24)}
-                })
-            },
-            "geographic": {
-                "countries": len(await db.tor_nodes.distinct("country")),
-                "top_countries": await get_top_countries()
-            },
-            "activity": {
-                "last_update": datetime.utcnow().isoformat(),
-                "status": "active"
-            }
-        }
+        # Get current stats from realtime service
+        stats = await realtime_service.get_current_stats()
         
         return APIResponse(
             success=True,
@@ -270,7 +247,96 @@ async def get_dashboard_stats():
         
     except Exception as e:
         logger.error(f"Error getting dashboard stats: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get statistics")
+        # Fallback to database query
+        try:
+            db = await get_database()
+            
+            stats = {
+                "nodes": {
+                    "total": await db.tor_nodes.count_documents({}),
+                    "guard": await db.tor_nodes.count_documents({"type": "guard"}),
+                    "middle": await db.tor_nodes.count_documents({"type": "middle"}),
+                    "exit": await db.tor_nodes.count_documents({"type": "exit"}),
+                    "bridge": await db.tor_nodes.count_documents({"type": "bridge"})
+                },
+                "correlations": {
+                    "total": await db.correlations.count_documents({}),
+                    "high_confidence": await db.correlations.count_documents({"confidence_score": {"$gte": 0.8}}),
+                    "medium_confidence": await db.correlations.count_documents({"confidence_score": {"$gte": 0.5, "$lt": 0.8}}),
+                    "recent": await db.correlations.count_documents({
+                        "created_at": {"$gte": datetime.utcnow() - timedelta(hours=24)}
+                    })
+                },
+                "geographic": {
+                    "countries": len(await db.tor_nodes.distinct("country")),
+                    "top_countries": await get_top_countries()
+                },
+                "activity": {
+                    "last_update": datetime.utcnow().isoformat(),
+                    "status": "active"
+                }
+            }
+            
+            return APIResponse(
+                success=True,
+                message="Dashboard statistics retrieved (fallback)",
+                data=stats
+            )
+            
+        except Exception as fallback_error:
+            logger.error(f"Fallback also failed: {fallback_error}")
+            raise HTTPException(status_code=500, detail="Failed to get statistics")
+
+@router.get("/dashboard/activity")
+async def get_recent_activity(
+    request: Request,
+    minutes: int = Query(60, ge=1, le=1440, description="Minutes of activity to retrieve")
+):
+    """Get recent system activity"""
+    try:
+        # Get realtime service from app state
+        realtime_service = request.app.state.realtime_service
+        
+        # Get recent activity
+        activity = await realtime_service.get_recent_activity(minutes)
+        
+        return APIResponse(
+            success=True,
+            message=f"Recent activity retrieved ({minutes} minutes)",
+            data=activity
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting recent activity: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get recent activity")
+
+@router.get("/traffic/flows")
+async def get_traffic_flows(
+    request: Request,
+    limit: int = Query(100, ge=1, le=1000),
+    minutes: int = Query(60, ge=1, le=1440)
+):
+    """Get recent traffic flows"""
+    try:
+        # Get traffic generator from realtime service
+        realtime_service = request.app.state.realtime_service
+        traffic_generator = realtime_service.traffic_generator
+        
+        # Get recent flows
+        flows = await traffic_generator.get_recent_traffic(minutes)
+        
+        # Limit results
+        limited_flows = flows[:limit]
+        
+        return APIResponse(
+            success=True,
+            message=f"Retrieved {len(limited_flows)} traffic flows",
+            data=[flow.dict() for flow in limited_flows]
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting traffic flows: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get traffic flows")
 
 async def get_top_countries() -> List[Dict[str, Any]]:
     """Get top countries by node count"""

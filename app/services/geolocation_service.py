@@ -182,9 +182,9 @@ class GeolocationService:
                 else:
                     results[ip] = result
             
-            # Small delay between batches to be respectful to free APIs
+            # Longer delay between batches to avoid rate limiting
             if i + batch_size < len(ip_addresses):
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(2.0)  # Increased delay to 2 seconds
         
         return results
     
